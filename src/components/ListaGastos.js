@@ -1,7 +1,8 @@
 import { ScrollView, Text, StyleSheet } from 'react-native';
 import TarjetaGasto from './TarjetaGasto';
 
-export default function ListaGastos({ gastos }) {
+// Recibimos "onEliminar" desde la pantalla principal
+export default function ListaGastos({ gastos, onEliminar }) {
   if (gastos.length === 0) {
     return (
       <Text style={styles.vacio}>
@@ -16,6 +17,8 @@ export default function ListaGastos({ gastos }) {
         <TarjetaGasto
           key={gasto.id}
           gasto={gasto}
+          // Le pasamos la función para que la tarjeta pueda borrar
+          onEliminar={() => onEliminar(gasto.id)}
         />
       ))}
     </ScrollView>

@@ -36,3 +36,10 @@ export async function agregarGasto(
 
   return nuevosGastos;
 }
+
+// Función para eliminar un gasto
+export async function eliminarGasto(gastosActuales, idGasto) {
+  const nuevosGastos = gastosActuales.filter((gasto) => gasto.id !== idGasto);
+  await guardarGastos(nuevosGastos);
+  return nuevosGastos;
+}

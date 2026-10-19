@@ -8,9 +8,11 @@ import {
   Alert,
 } from 'react-native';
 
+// 1. Importamos eliminarGasto junto con los otros métodos
 import {
   cargarGastos,
   agregarGasto,
+  eliminarGasto,
 } from '../controllers/GastosController';
 
 import FormularioGasto from '../components/FormularioGasto';
@@ -44,6 +46,9 @@ export default function GastosScreen() {
     iniciar();
   }, []);
 
+  // 2. Calculamos el total sumando los montos
+  const totalGastado = gastos.reduce((acumulador, gasto) => acumulador + gasto.monto, 0);
+
   const manejarAgregar = async () => {
     if (guardando || cargando) {
       return;
@@ -74,6 +79,16 @@ export default function GastosScreen() {
     }
   };
 
+  // 3. Función para manejar la eliminación
+  const manejarEliminar = async (id) => {
+    try {
+      const nuevosGastos = await eliminarGasto(gastos, id);
+      setGastos(nuevosGastos);
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo eliminar el gasto.');
+    }
+  };
+
   if (cargando) {
     return (
       <View style={styles.cargando}>
@@ -93,6 +108,12 @@ export default function GastosScreen() {
         Registro de gastos personales
       </Text>
 
+      {/* 4. Acá mostramos el cartel verde con el Total */}
+      <View style={styles.contenedorTotal}>
+        <Text style={styles.textoTotal}>Total gastado:</Text>
+        <Text style={styles.montoTotal}>${totalGastado.toLocaleString('es-AR')}</Text>
+      </View>
+
       <FormularioGasto
         descripcion={descripcion}
         setDescripcion={setDescripcion}
@@ -104,7 +125,8 @@ export default function GastosScreen() {
         deshabilitado={guardando}
       />
 
-      <ListaGastos gastos={gastos} />
+      {/* 5. Le pasamos la función manejarEliminar a la lista */}
+      <ListaGastos gastos={gastos} onEliminar={manejarEliminar} />
     </View>
   );
 }
@@ -126,6 +148,26 @@ const styles = StyleSheet.create({
     color: '#777777',
     marginTop: 5,
     marginBottom: 20,
+  },
+  // Estilos para el recuadro del Total
+  contenedorTotal: {
+    backgroundColor: '#53745B',
+    padding: 16,
+    borderRadius: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  textoTotal: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  montoTotal: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: 'bold',
   },
   cargando: {
     flex: 1,
