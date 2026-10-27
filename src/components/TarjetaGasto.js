@@ -44,10 +44,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 12,
+    marginBottom: 8,
     flexDirection: 'row', // Pone la info y los botones en la misma fila
     justifyContent: 'space-between', // Separa la info de los botones
     alignItems: 'center',
+    marginHorizontal: 5,
   },
   
   // Estilo para el contenedor de la izquierda

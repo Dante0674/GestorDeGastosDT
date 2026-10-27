@@ -6,7 +6,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Pressable, // <-- NUEVO: Necesario para el botón de cancelar edición
+  Pressable, // Necesario para el botón de cancelar edición
+  Modal,      // <-- NUEVO: Para la ventanita de la clave
+  TextInput,  // <-- NUEVO: Para escribir la clave
 } from 'react-native';
 
 // 1. Agregamos editarGasto a los imports
@@ -22,15 +24,19 @@ import ListaGastos from '../components/ListaGastos';
 
 export default function GastosScreen() {
   const [gastos, setGastos] = useState([]);
-
   const [descripcion, setDescripcion] = useState('');
   const [monto, setMonto] = useState('');
-  const [categoria, setCategoria] = useState('Alimentación');
+  const [categoria, setCategoria] = useState('');
 
-  // <-- NUEVO: Estado para guardar el ID del gasto que estamos editando
+  // Estado para guardar el ID del gasto que estamos editando
   const [gastoEnEdicion, setGastoEnEdicion] = useState(null);
   // Variable que nos dice si estamos editando o no
   const modoEdicion = gastoEnEdicion !== null;
+
+  // NUEVO: Estados para manejar la clave secreta al eliminar
+  const [modalVisible, setModalVisible] = useState(false);
+  const [idParaEliminar, setIdParaEliminar] = useState(null);
+  const [claveIngresada, setClaveIngresada] = useState('');
 
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
@@ -52,11 +58,11 @@ export default function GastosScreen() {
   // 2. Calculamos el total sumando los montos
   const totalGastado = gastos.reduce((acumulador, gasto) => acumulador + gasto.monto, 0);
 
-  // <-- NUEVO: Función que limpia el formulario y sale del modo edición
+  // Función que limpia el formulario y sale del modo edición
   const limpiarFormulario = () => {
     setDescripcion('');
     setMonto('');
-    setCategoria('Alimentación');
+    setCategoria('');
     setGastoEnEdicion(null); // Esto apaga el modo edición
   };
 
@@ -75,7 +81,7 @@ export default function GastosScreen() {
     }
   };
 
-  // <-- NUEVO: Cuando el usuario toca el lápiz, carga los datos al formulario
+  // Cuando el usuario toca el lápiz, carga los datos al formulario
   const manejarEditar = (gasto) => {
     setGastoEnEdicion(gasto.id);
     setDescripcion(gasto.descripcion);
@@ -83,7 +89,7 @@ export default function GastosScreen() {
     setCategoria(gasto.categoria);
   };
 
-  // <-- NUEVO: Guardar los cambios hechos en el formulario
+  // Guardar los cambios hechos en el formulario
   const manejarGuardarEdicion = async () => {
     if (guardando || cargando || gastoEnEdicion === null) return;
 
@@ -99,33 +105,33 @@ export default function GastosScreen() {
     }
   };
 
-  // <-- MODIFICADO: Ahora te pregunta antes de borrar (como el profe)
+  // NUEVO: Abre la ventanita (Modal) en lugar del Alert normal
   const manejarEliminar = (id) => {
     if (guardando || cargando) return;
+    setIdParaEliminar(id);
+    setClaveIngresada('');
+    setModalVisible(true);
+  };
 
-    Alert.alert(
-      'Eliminar gasto',
-      '¿Estás seguro de que querés eliminar este gasto?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              setGuardando(true);
-              const nuevosGastos = await eliminarGasto(gastos, id);
-              setGastos(nuevosGastos);
-              if (gastoEnEdicion === id) limpiarFormulario(); // Si borramos el que estábamos editando, limpiamos todo
-            } catch (error) {
-              Alert.alert('Error', 'No se pudo eliminar el gasto.');
-            } finally {
-              setGuardando(false);
-            }
-          },
-        },
-      ]
-    );
+  // NUEVO: Verifica la clave y elimina el gasto
+  const confirmarEliminacion = async () => {
+    // Validamos la clave secreta
+    if (claveIngresada !== '1234') {
+      Alert.alert('Código incorrecto', 'La clave de seguridad es 1234.');
+      return;
+    }
+
+    try {
+      setGuardando(true);
+      const nuevosGastos = await eliminarGasto(gastos, idParaEliminar);
+      setGastos(nuevosGastos);
+      if (gastoEnEdicion === idParaEliminar) limpiarFormulario(); // Si borramos el que estábamos editando, limpiamos todo
+      setModalVisible(false); // Cerramos la ventanita
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo eliminar el gasto.');
+    } finally {
+      setGuardando(false);
+    }
   };
 
   if (cargando) {
@@ -156,13 +162,13 @@ export default function GastosScreen() {
         categoria={categoria}
         setCategoria={setCategoria}
         onAgregar={manejarAgregar}
-        // <-- NUEVO: Le pasamos las funciones y el estado de edición al formulario
+        // Le pasamos las funciones y el estado de edición al formulario
         onEditar={manejarGuardarEdicion}
         modoEdicion={modoEdicion}
         deshabilitado={guardando}
       />
 
-      {/* <-- NUEVO: Botón de cancelar edición (solo aparece si estamos editando) */}
+      {/* Botón de cancelar edición (solo aparece si estamos editando) */}
       {modoEdicion && (
         <Pressable style={styles.botonCancelar} onPress={limpiarFormulario} disabled={guardando}>
           <Text style={styles.textoCancelar}>Cancelar edición</Text>
@@ -175,6 +181,47 @@ export default function GastosScreen() {
         onEliminarGasto={manejarEliminar} 
         onEditarGasto={manejarEditar} 
       />
+
+      {/* NUEVO: VENTANA EMERGENTE PARA LA CLAVE SECRETA */}
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="fade"
+      >
+        <View style={styles.modalFondo}>
+          <View style={styles.modalContenido}>
+            <Text style={styles.modalTitulo}>Código de seguridad</Text>
+            <Text style={styles.modalTexto}>Ingresá la clave para eliminar este gasto:</Text>
+            
+            <TextInput
+              style={styles.modalInput}
+              keyboardType="numeric"
+              secureTextEntry={true} // Para que aparezcan puntitos en vez de números
+              value={claveIngresada}
+              onChangeText={setClaveIngresada}
+              placeholder="****"
+              maxLength={4}
+            />
+
+            <View style={styles.modalBotones}>
+              <Pressable
+                style={[styles.modalBoton, styles.botonCancelarModal]}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.textoBotonModal}>Cancelar</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.modalBoton, styles.botonEliminarModal]}
+                onPress={confirmarEliminacion}
+              >
+                <Text style={styles.textoBotonModal}>Eliminar</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </View>
   );
 }
@@ -185,9 +232,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F4EF',
     paddingTop: 60,
     paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   titulo: {
-    fontSize: 28,
+    fontSize: 25,
     fontWeight: 'bold',
     color: '#333333',
   },
@@ -204,7 +252,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
   },
   textoTotal: {
     color: '#FFFFFF',
@@ -216,7 +264,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
   },
-  // <-- NUEVO: Estilos para el botón de cancelar edición
+  // Estilos para el botón de cancelar edición
   botonCancelar: {
     alignItems: 'center',
     padding: 10,
@@ -235,5 +283,66 @@ const styles = StyleSheet.create({
   textoCargando: {
     marginTop: 12,
     color: '#777777',
+  },
+
+  // NUEVO: ESTILOS DEL MODAL (LA VENTANITA)
+  modalFondo: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)', // Fondo oscuro semitransparente
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContenido: {
+    backgroundColor: '#FFFFFF',
+    padding: 20,
+    borderRadius: 12,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitulo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 10,
+  },
+  modalTexto: {
+    fontSize: 14,
+    color: '#777777',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#DDDDDD',
+    borderRadius: 8,
+    padding: 10,
+    width: '100%',
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 20,
+    letterSpacing: 5,
+  },
+  modalBotones: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    gap: 10,
+  },
+  modalBoton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  botonCancelarModal: {
+    backgroundColor: '#95a5a6', // Gris
+  },
+  botonEliminarModal: {
+    backgroundColor: '#E74C3C', // Rojo
+  },
+  textoBotonModal: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 15,
   },
 });

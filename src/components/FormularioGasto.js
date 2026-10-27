@@ -38,16 +38,22 @@ export default function FormularioGasto({
         keyboardType="decimal-pad"
       />
 
-            {/* Título para las categorías */}
-      <Text style={styles.tituloCategoria}>Categoría:</Text>
-
+         
       {/* Desplegable de categorías con Picker */}
       <View style={styles.contenedorPicker}>
         <Picker
           selectedValue={categoria}
           onValueChange={(itemValue) => setCategoria(itemValue)}
           style={styles.picker}
+          enabled={!deshabilitado} // <-- Un detalle del profe para que no se toque al guardar
         >
+          {/* Agregamos esta opción como texto de ayuda (no seleccionable) */}
+          <Picker.Item 
+            label="Seleccioná una categoría" 
+            value="" 
+            enabled={false} 
+          />
+
           <Picker.Item label="Alimentación" value="Alimentación" />
           <Picker.Item label="Transporte" value="Transporte" />
           <Picker.Item label="Entretenimiento" value="Entretenimiento" />
@@ -90,14 +96,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   input: {
     borderWidth: 1,
     borderColor: '#DDDDDD',
     borderRadius: 8,
     padding: 7,
-    marginBottom: 10,
+    marginBottom: 10, // <-- Este margen es el que separa las cajas
     fontSize: 15,
   },
   boton: {
@@ -105,8 +111,8 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 8,
     alignItems: 'center',
+    marginTop: 5, // Un poquito de aire arriba del botón
   },
-  // Nuevo estilo para cuando el botón dice "Guardar cambios"
   botonModoEdicion: {
     backgroundColor: '#E67E22', // Color naranja
   },
@@ -115,32 +121,23 @@ const styles = StyleSheet.create({
   },
   textoBoton: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: 'bold',
   },
-  tituloCategoria: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#555555',
-    marginBottom: 3,
-    marginTop: 5,
-  },
-  contenedorCategorias: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 15,
-  },
-     contenedorPicker: {
+  
+  // SOLO ESTOS DOS ESTILOS DEL PICKER
+  contenedorPicker: {
     borderWidth: 1,
     borderColor: '#DDDDDD',
     borderRadius: 8,
-    marginBottom: 15,
-    // Le quitamos el overflow: 'hidden' para que el texto no se corte
+    marginBottom: 6, // <-- El MISMO margen que los inputs para que queden parejos
+    width: '100%',
   },
   picker: {
-    height: 55, // Un poquito más alto para que la letra respire
+    height: 55, // <-- Altura similar a los inputs
     width: '100%',
     color: '#333333',
+    paddingHorizontal: 0, 
+    marginHorizontal: 0,
   },
 });
