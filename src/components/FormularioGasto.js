@@ -1,3 +1,5 @@
+// Importamos Picker
+import { Picker } from '@react-native-picker/picker';
 import {
   View,
   Text,
@@ -36,28 +38,22 @@ export default function FormularioGasto({
         keyboardType="decimal-pad"
       />
 
-      {/* Título para las categorías */}
+            {/* Título para las categorías */}
       <Text style={styles.tituloCategoria}>Categoría:</Text>
 
-      {/* Botones para elegir la categoría */}
-      <View style={styles.contenedorCategorias}>
-        {['Alimentación', 'Transporte', 'Entretenimiento', 'Salud', 'Otros'].map((cat) => (
-          <Pressable
-            key={cat}
-            style={[
-              styles.botonCategoria,
-              categoria === cat && styles.botonCategoriaActivo
-            ]}
-            onPress={() => setCategoria(cat)}
-          >
-            <Text style={[
-              styles.textoCategoria,
-              categoria === cat && styles.textoCategoriaActivo
-            ]}>
-              {cat}
-            </Text>
-          </Pressable>
-        ))}
+      {/* Desplegable de categorías con Picker */}
+      <View style={styles.contenedorPicker}>
+        <Picker
+          selectedValue={categoria}
+          onValueChange={(itemValue) => setCategoria(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Alimentación" value="Alimentación" />
+          <Picker.Item label="Transporte" value="Transporte" />
+          <Picker.Item label="Entretenimiento" value="Entretenimiento" />
+          <Picker.Item label="Salud" value="Salud" />
+          <Picker.Item label="Otros" value="Otros" />
+        </Picker>
       </View>
 
       {/* Lógica del botón: Si estamos en modo edición, muestra "Guardar cambios", sino "Agregar gasto" */}
@@ -126,7 +122,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     color: '#555555',
-    marginBottom: 8,
+    marginBottom: 3,
     marginTop: 5,
   },
   contenedorCategorias: {
@@ -135,24 +131,16 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 15,
   },
-  botonCategoria: {
-    backgroundColor: '#F0F0F0',
-    paddingVertical: 5,
-    paddingHorizontal: 9,
-    borderRadius: 12,
+     contenedorPicker: {
     borderWidth: 1,
     borderColor: '#DDDDDD',
+    borderRadius: 8,
+    marginBottom: 15,
+    // Le quitamos el overflow: 'hidden' para que el texto no se corte
   },
-  botonCategoriaActivo: {
-    backgroundColor: '#53745B',
-    borderColor: '#53745B',
-  },
-  textoCategoria: {
-    color: '#555555',
-    fontSize: 10,
-  },
-  textoCategoriaActivo: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+  picker: {
+    height: 55, // Un poquito más alto para que la letra respire
+    width: '100%',
+    color: '#333333',
   },
 });
