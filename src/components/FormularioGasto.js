@@ -17,15 +17,17 @@ export default function FormularioGasto({
   categoria,
   setCategoria,
   onAgregar,
-  onEditar,     // <-- NUEVO: función para guardar la edición
-  modoEdicion,  // <-- NUEVO: booleano (true/false) para saber si estamos editando
+  onEditar,     // Función para guardar la edición
+  modoEdicion,  // Booleano (true/false) para saber si estamos editando
   deshabilitado,
+  onLimpiar,   // Función para limpiar el formulario
 }) {
   return (
     <View style={styles.formulario}>
       <TextInput
         style={styles.input}
         placeholder="Descripción"
+        placeholderTextColor="#333333"
         value={descripcion}
         onChangeText={setDescripcion}
       />
@@ -33,6 +35,7 @@ export default function FormularioGasto({
       <TextInput
         style={styles.input}
         placeholder="Monto"
+        placeholderTextColor="#333333"
         value={monto}
         onChangeText={setMonto}
         keyboardType="decimal-pad"
@@ -49,7 +52,7 @@ export default function FormularioGasto({
         >
           {/* Agregamos esta opción como texto de ayuda (no seleccionable) */}
           <Picker.Item 
-            label="Seleccioná una categoría" 
+            label="Seleccionar categoría" 
             value="" 
             enabled={false} 
           />
@@ -85,6 +88,12 @@ export default function FormularioGasto({
           disabled={deshabilitado}
         >
           <Text style={styles.textoBoton}>Agregar gasto</Text>
+        </Pressable>
+      )}
+      {/*Botón de limpiar */}
+      {(descripcion.length > 0 || monto.length > 0 || categoria !== '') && !modoEdicion && (
+        <Pressable onPress={onLimpiar} style={styles.botonLimpiar}>
+          <Text style={styles.textoLimpiar}>Limpiar formulario</Text>
         </Pressable>
       )}
     </View>
@@ -139,5 +148,15 @@ const styles = StyleSheet.create({
     color: '#333333',
     paddingHorizontal: 0, 
     marginHorizontal: 0,
+  },
+    // Estilos para el botón de limpiar
+  botonLimpiar: {
+    marginTop: 15,
+    alignItems: 'center',
+  },
+  textoLimpiar: {
+    color: '#E74C3C', // Color rojo para que se note que borra
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

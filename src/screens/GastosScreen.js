@@ -7,8 +7,8 @@ import {
   ActivityIndicator,
   Alert,
   Pressable, // Necesario para el botón de cancelar edición
-  Modal,      // <-- NUEVO: Para la ventanita de la clave
-  TextInput,  // <-- NUEVO: Para escribir la clave
+  Modal,      // Para la ventanita de la clave
+  TextInput,  // Para escribir la clave
 } from 'react-native';
 
 // 1. Agregamos editarGasto a los imports
@@ -58,6 +58,14 @@ export default function GastosScreen() {
   // 2. Calculamos el total sumando los montos
   const totalGastado = gastos.reduce((acumulador, gasto) => acumulador + gasto.monto, 0);
 
+  // Cantidad total de gastos
+  const cantidadGastos = gastos.length;
+
+  // Buscamos el Gasto más alto
+  const gastoMasAlto = gastos.length > 0 
+    ? gastos.reduce((max, gasto) => (gasto.monto > max.monto ? gasto : max), gastos[0]) 
+    : null;
+
   // Función que limpia el formulario y sale del modo edición
   const limpiarFormulario = () => {
     setDescripcion('');
@@ -105,7 +113,7 @@ export default function GastosScreen() {
     }
   };
 
-  // NUEVO: Abre la ventanita (Modal) en lugar del Alert normal
+  // Abre la ventanita (Modal) en lugar del Alert normal
   const manejarEliminar = (id) => {
     if (guardando || cargando) return;
     setIdParaEliminar(id);
@@ -113,7 +121,7 @@ export default function GastosScreen() {
     setModalVisible(true);
   };
 
-  // NUEVO: Verifica la clave y elimina el gasto
+  // Verifica la clave y elimina el gasto
   const confirmarEliminacion = async () => {
     // Validamos la clave secreta
     if (claveIngresada !== '1234') {
@@ -154,6 +162,18 @@ export default function GastosScreen() {
         <Text style={styles.montoTotal}>${totalGastado.toLocaleString('es-AR')}</Text>
       </View>
 
+      {/* Mostramos Cartel con cantidad y gasto más alto */}
+      <View style={styles.contenedorResumen}>
+        <Text style={styles.textoResumen}>
+          📊 Gastos registrados: <Text style={styles.textoNegrita}>{cantidadGastos}</Text>
+        </Text>
+        {gastoMasAlto && (
+          <Text style={styles.textoResumen}>
+            🏆 Gasto más alto: <Text style={styles.textoNegrita}>{gastoMasAlto.descripcion} (${gastoMasAlto.monto.toLocaleString('es-AR')})</Text>
+          </Text>
+        )}
+      </View>
+
       <FormularioGasto
         descripcion={descripcion}
         setDescripcion={setDescripcion}
@@ -166,6 +186,7 @@ export default function GastosScreen() {
         onEditar={manejarGuardarEdicion}
         modoEdicion={modoEdicion}
         deshabilitado={guardando}
+        onLimpiar={limpiarFormulario}
       />
 
       {/* Botón de cancelar edición (solo aparece si estamos editando) */}
@@ -182,7 +203,7 @@ export default function GastosScreen() {
         onEditarGasto={manejarEditar} 
       />
 
-      {/* NUEVO: VENTANA EMERGENTE PARA LA CLAVE SECRETA */}
+      {/* VENTANA EMERGENTE PARA LA CLAVE SECRETA */}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -232,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F4EF',
     paddingTop: 60,
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 50,
   },
   titulo: {
     fontSize: 25,
@@ -243,7 +264,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#777777',
     marginTop: 5,
-    marginBottom: 20,
+    marginBottom: 5,
   },
   contenedorTotal: {
     backgroundColor: '#53745B',
@@ -252,7 +273,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 5,
   },
   textoTotal: {
     color: '#FFFFFF',
@@ -285,7 +306,7 @@ const styles = StyleSheet.create({
     color: '#777777',
   },
 
-  // NUEVO: ESTILOS DEL MODAL (LA VENTANITA)
+  // ESTILOS DEL MODAL (LA VENTANITA)
   modalFondo: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)', // Fondo oscuro semitransparente
@@ -344,5 +365,23 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 15,
+  },
+  // Estilos para el resumen
+  contenedorResumen: {
+    backgroundColor: '#E7EFE8',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 5,
+    gap: 4,
+  },
+  textoResumen: {
+    fontSize: 11,
+    color: '#333333',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  textoNegrita: {
+    fontWeight: 'bold',
+    color: '#53745B',
   },
 });
