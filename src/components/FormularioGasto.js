@@ -50,7 +50,7 @@ export default function FormularioGasto({
           style={styles.picker}
           enabled={!deshabilitado} // <-- Un detalle del profe para que no se toque al guardar
         >
-          {/* Agregamos esta opción como texto de ayuda (no seleccionable) */}
+          {/* Agregamos esta opción no seleccionable */}
           <Picker.Item 
             label="Seleccionar categoría" 
             value="" 
@@ -90,7 +90,7 @@ export default function FormularioGasto({
           <Text style={styles.textoBoton}>Agregar gasto</Text>
         </Pressable>
       )}
-      {/*Botón de limpiar */}
+      {/* Botón de limpiar */}
       {(descripcion.length > 0 || monto.length > 0 || categoria !== '') && !modoEdicion && (
         <Pressable onPress={onLimpiar} style={styles.botonLimpiar}>
           <Text style={styles.textoLimpiar}>Limpiar formulario</Text>

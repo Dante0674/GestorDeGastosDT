@@ -11,7 +11,7 @@ import {
   TextInput,  // Para escribir la clave
 } from 'react-native';
 
-// 1. Agregamos editarGasto a los imports
+// Agregamos editarGasto a los imports
 import {
   cargarGastos,
   agregarGasto,
@@ -33,11 +33,11 @@ export default function GastosScreen() {
   // Variable que nos dice si estamos editando o no
   const modoEdicion = gastoEnEdicion !== null;
 
-  // NUEVO: Estados para manejar la clave secreta al eliminar
+  // Estados para manejar la clave secreta al eliminar
   const [modalVisible, setModalVisible] = useState(false);
   const [idParaEliminar, setIdParaEliminar] = useState(null);
   const [claveIngresada, setClaveIngresada] = useState('');
-
+ 
   const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
 
@@ -55,7 +55,7 @@ export default function GastosScreen() {
     iniciar();
   }, []);
 
-  // 2. Calculamos el total sumando los montos
+  // Calculamos el total sumando los montos
   const totalGastado = gastos.reduce((acumulador, gasto) => acumulador + gasto.monto, 0);
 
   // Cantidad total de gastos
@@ -81,7 +81,7 @@ export default function GastosScreen() {
       setGuardando(true);
       const nuevosGastos = await agregarGasto(gastos, descripcion, monto, categoria);
       setGastos(nuevosGastos);
-      limpiarFormulario(); // Usamos la función nueva para limpiar
+      limpiarFormulario(); // Usamos la función para limpiar
     } catch (error) {
       Alert.alert('No se pudo agregar el gasto', error.message || 'Ocurrió un error inesperado.');
     } finally {
@@ -113,7 +113,7 @@ export default function GastosScreen() {
     }
   };
 
-  // Abre la ventanita (Modal) en lugar del Alert normal
+  // Abre la ventanita Modal en lugar del Alert normal
   const manejarEliminar = (id) => {
     if (guardando || cargando) return;
     setIdParaEliminar(id);
@@ -156,7 +156,7 @@ export default function GastosScreen() {
       <Text style={styles.titulo}>Mis gastos</Text>
       <Text style={styles.subtitulo}>Registro de gastos personales</Text>
 
-      {/* 4. Acá mostramos el cartel verde con el Total */}
+      {/* Acá mostramos el cartel verde con el Total */}
       <View style={styles.contenedorTotal}>
         <Text style={styles.textoTotal}>Total gastado:</Text>
         <Text style={styles.montoTotal}>${totalGastado.toLocaleString('es-AR')}</Text>
@@ -189,14 +189,14 @@ export default function GastosScreen() {
         onLimpiar={limpiarFormulario}
       />
 
-      {/* Botón de cancelar edición (solo aparece si estamos editando) */}
+      {/* Botón de cancelar edición que solo aparece si estamos editando */}
       {modoEdicion && (
         <Pressable style={styles.botonCancelar} onPress={limpiarFormulario} disabled={guardando}>
           <Text style={styles.textoCancelar}>Cancelar edición</Text>
         </Pressable>
       )}
 
-      {/* 5. Le pasamos las funciones a la lista (Nota: les agregamos "Gasto" al final) */}
+      {/* Le pasamos las funciones a la lista y le agregamos "Gasto" al final */}
       <ListaGastos 
         gastos={gastos} 
         onEliminarGasto={manejarEliminar} 
@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     color: '#777777',
   },
 
-  // ESTILOS DEL MODAL (LA VENTANITA)
+  // ESTILOS DEL MODAL
   modalFondo: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)', // Fondo oscuro semitransparente
